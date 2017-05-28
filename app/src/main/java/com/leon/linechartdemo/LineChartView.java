@@ -7,11 +7,11 @@ import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.Shader;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -33,15 +33,20 @@ public class LineChartView extends View {
     private int[] mDataList;
     private int mMax;
     private String[] mHorizontalAxis;
+
     private final int mRadius;
+    private final int mClickRadius;
 
     private List<Dot> mDots = new ArrayList<Dot>();
     private Rect mTextRect;
-    private RectF mTemp;
     private int mGap;
     private Path mPath;
     private Path mGradientPath;
     private int mStep;
+
+    private int mSelectedDotIndex = -1;
+    private int mSelectedDotColor = Color.RED;
+    private int mNormalDotColor = Color.BLACK;
 
     public LineChartView(Context context) {
         this(context, null);
@@ -62,8 +67,8 @@ public class LineChartView extends View {
         mDotPaint.setAntiAlias(true);
 
         mRadius = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources().getDisplayMetrics());
+        mClickRadius = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, getResources().getDisplayMetrics());
         mTextRect = new Rect();
-        mTemp = new RectF();
         mGap = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, getResources().getDisplayMetrics());
 
 
@@ -131,6 +136,12 @@ public class LineChartView extends View {
             int y = getHeight()-getPaddingBottom();
             canvas.drawText(axis, x, y, mAxisPaint);
             Dot dot = mDots.get(i);
+            if (i == mSelectedDotIndex) {
+                mDotPaint.setColor(mSelectedDotColor);
+                canvas.drawText(String.valueOf(mDataList[i]), dot.x, dot.y - mRadius - mGap, mAxisPaint);
+            } else {
+                mDotPaint.setColor(mNormalDotColor);
+            }
             canvas.drawCircle(dot.x, dot.y, mRadius, mDotPaint);
         }
     }
@@ -149,5 +160,37 @@ public class LineChartView extends View {
         int y;
         int value;
         int transformedValue;
+    }
+
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                mSelectedDotIndex = getClickDotIndex(event.getX(), event.getY());
+                invalidate();
+                break;
+            case MotionEvent.ACTION_UP:
+                mSelectedDotIndex = -1;
+                invalidate();
+                break;
+        }
+        return true;
+    }
+
+    private int getClickDotIndex(float x, float y) {
+        int index = -1;
+        for (int i = 0; i < mDots.size(); i++) {
+            Dot dot = mDots.get(i);
+            int left = dot.x - mClickRadius;
+            int top = dot.y - mClickRadius;
+            int right = dot.x + mClickRadius;
+            int bottom = dot.y + mClickRadius;
+            if (x > left && x < right && y > top && y < bottom) {
+                index = i;
+                break;
+            }
+        }
+        return index;
     }
 }
