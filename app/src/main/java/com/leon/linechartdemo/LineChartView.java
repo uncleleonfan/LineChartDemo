@@ -30,8 +30,6 @@ public class LineChartView extends View {
     private String[] mHorizontalAxis;
     private final int mRadius;
 
-
-
     private List<Dot> mDots = new ArrayList<Dot>();
     private Rect mTextRect;
     private RectF mTemp;
@@ -56,7 +54,7 @@ public class LineChartView extends View {
         mDotPaint = new Paint();
         mDotPaint.setAntiAlias(true);
 
-        mRadius = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, getResources().getDisplayMetrics());
+        mRadius = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources().getDisplayMetrics());
         mTextRect = new Rect();
         mTemp = new RectF();
         mGap = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, getResources().getDisplayMetrics());
@@ -102,11 +100,14 @@ public class LineChartView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         canvas.drawPath(mPath, mLinePaint);
-        for (int i = 0; i < mHorizontalAxis.length; i++) {
+        for (int i = 0; i < mDots.size(); i++) {
             String axis = mHorizontalAxis[i];
             int x = getPaddingLeft() + i * mStep;
             int y = getHeight()-getPaddingBottom();
             canvas.drawText(axis, x, y, mAxisPaint);
+
+            Dot dot = mDots.get(i);
+            canvas.drawCircle(dot.x, dot.y, mRadius, mDotPaint);
         }
     }
 
