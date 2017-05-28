@@ -1,6 +1,7 @@
 package com.leon.linechartdemo;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
@@ -17,17 +18,13 @@ import android.view.View;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Leon on 2017/5/27.
- */
-
 public class LineChartView extends View {
 
 
-    private final Paint mAxisPaint;
-    private final Paint mDotPaint;
-    private final Paint mLinePaint;
-    private final Paint mGradientPaint;
+    private Paint mAxisPaint;
+    private Paint mDotPaint;
+    private Paint mLinePaint;
+    private Paint mGradientPaint;
 
     private static int[] DEFAULT_GRADIENT_COLORS = {Color.BLUE, Color.GREEN};
     private int[] mDataList;
@@ -45,8 +42,9 @@ public class LineChartView extends View {
     private int mStep;
 
     private int mSelectedDotIndex = -1;
-    private int mSelectedDotColor = Color.RED;
-    private int mNormalDotColor = Color.BLACK;
+    private int mSelectedDotColor;
+    private int mNormalDotColor;
+    private int mLineColor;
 
     public LineChartView(Context context) {
         this(context, null);
@@ -55,9 +53,24 @@ public class LineChartView extends View {
     public LineChartView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
 
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.LineChartView);
+        mLineColor = typedArray.getColor(R.styleable.LineChartView_line_color, Color.BLACK);
+        mNormalDotColor = typedArray.getColor(R.styleable.LineChartView_dot_normal_color, Color.BLACK);
+        mSelectedDotColor = typedArray.getColor(R.styleable.LineChartView_dot_selected_color, Color.RED);
+        typedArray.recycle();
+
+        initPaint();
+
         mPath = new Path();
         mGradientPath = new Path();
 
+        mRadius = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources().getDisplayMetrics());
+        mClickRadius = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, getResources().getDisplayMetrics());
+        mTextRect = new Rect();
+        mGap = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, getResources().getDisplayMetrics());
+    }
+
+    private void initPaint() {
         mAxisPaint = new Paint();
         mAxisPaint.setAntiAlias(true);
         mAxisPaint.setTextSize(20);
@@ -66,20 +79,14 @@ public class LineChartView extends View {
         mDotPaint = new Paint();
         mDotPaint.setAntiAlias(true);
 
-        mRadius = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources().getDisplayMetrics());
-        mClickRadius = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, getResources().getDisplayMetrics());
-        mTextRect = new Rect();
-        mGap = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, getResources().getDisplayMetrics());
-
-
         mLinePaint = new Paint();
         mLinePaint.setAntiAlias(true);
         mLinePaint.setStrokeWidth(3);
         mLinePaint.setStyle(Paint.Style.STROKE);
+        mLinePaint.setColor(mLineColor);
 
         mGradientPaint = new Paint();
         mGradientPaint.setAntiAlias(true);
-
     }
 
     @Override

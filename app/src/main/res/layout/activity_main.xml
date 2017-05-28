@@ -13,6 +13,9 @@
         android:layout_height="300dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
-        android:paddingTop="20dp"/>
+        android:paddingTop="20dp"
+        app:line_color="#ff00ff"
+        app:dot_normal_color="#00ff00"
+        app:dot_selected_color="#0000ff"/>
 
 </FrameLayout>

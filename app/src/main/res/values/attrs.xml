@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="LineChartView">
+        <attr name="line_color" format="color|reference"/>
+        <attr name="dot_normal_color" format="color|reference"/>
+        <attr name="dot_selected_color" format="color|reference"/>
+    </declare-styleable>
+</resources>
