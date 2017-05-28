@@ -2,10 +2,13 @@ package com.leon.linechartdemo;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Shader;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -24,7 +27,9 @@ public class LineChartView extends View {
     private final Paint mAxisPaint;
     private final Paint mDotPaint;
     private final Paint mLinePaint;
+    private final Paint mGradientPaint;
 
+    private static int[] DEFAULT_GRADIENT_COLORS = {Color.BLUE, Color.GREEN};
     private int[] mDataList;
     private int mMax;
     private String[] mHorizontalAxis;
@@ -35,6 +40,7 @@ public class LineChartView extends View {
     private RectF mTemp;
     private int mGap;
     private Path mPath;
+    private Path mGradientPath;
     private int mStep;
 
     public LineChartView(Context context) {
@@ -45,6 +51,7 @@ public class LineChartView extends View {
         super(context, attrs);
 
         mPath = new Path();
+        mGradientPath = new Path();
 
         mAxisPaint = new Paint();
         mAxisPaint.setAntiAlias(true);
@@ -64,6 +71,10 @@ public class LineChartView extends View {
         mLinePaint.setAntiAlias(true);
         mLinePaint.setStrokeWidth(3);
         mLinePaint.setStyle(Paint.Style.STROKE);
+
+        mGradientPaint = new Paint();
+        mGradientPaint.setAntiAlias(true);
+
     }
 
     @Override
@@ -88,24 +99,37 @@ public class LineChartView extends View {
 
             if (i == 0) {
                 mPath.moveTo(dot.x, dot.y);
+                mGradientPath.moveTo(dot.x, dot.y);
             } else {
                 mPath.lineTo(dot.x, dot.y);
+                mGradientPath.lineTo(dot.x, dot.y);
             }
 
+            if (i == mDataList.length - 1) {
+                int bottom = getPaddingTop() + barHeight;
+                mGradientPath.lineTo(dot.x, bottom);
+
+                Dot firstDot = mDots.get(0);
+                mGradientPath.lineTo(firstDot.x, bottom);
+                mGradientPath.lineTo(firstDot.x, firstDot.y);
+            }
             mDots.add(dot);
         }
+
+        Shader shader = new LinearGradient(0, 0, 0, getHeight(), DEFAULT_GRADIENT_COLORS, null, Shader.TileMode.CLAMP);
+        mGradientPaint.setShader(shader);
     }
 
 
     @Override
     protected void onDraw(Canvas canvas) {
         canvas.drawPath(mPath, mLinePaint);
+        canvas.drawPath(mGradientPath, mGradientPaint);
         for (int i = 0; i < mDots.size(); i++) {
             String axis = mHorizontalAxis[i];
             int x = getPaddingLeft() + i * mStep;
             int y = getHeight()-getPaddingBottom();
             canvas.drawText(axis, x, y, mAxisPaint);
-
             Dot dot = mDots.get(i);
             canvas.drawCircle(dot.x, dot.y, mRadius, mDotPaint);
         }
